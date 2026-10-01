@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Super Admin Dashboard | APS Bada Mart</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body class="bg-slate-100 text-slate-800 antialiased font-sans min-h-screen">
+
+  <!-- PIN Lock Screen -->
+  <div id="pin-lock" class="fixed inset-0 bg-slate-900 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-sm w-full p-8 text-center space-y-4 shadow-2xl border-t-4 border-[#7B0B18]">
+      <div class="w-16 h-16 bg-red-100 text-[#7B0B18] rounded-2xl flex items-center justify-center text-2xl mx-auto shadow-inner">
+        <i class="fa-solid fa-user-shield"></i>
+      </div>
+      <h2 class="text-xl font-black text-slate-900">Admin Control Access</h2>
+      <p class="text-xs text-slate-500">Authorized personnel only. Enter Master PIN.</p>
+      <input type="password" id="admin-pin" placeholder="Enter PIN (Default: 1234)" class="w-full text-center tracking-widest text-lg font-bold py-3 border rounded-xl focus:ring-2 focus:ring-[#7B0B18] outline-none">
+      <button onclick="checkAdminPin()" class="w-full bg-[#7B0B18] hover:bg-[#5E0812] text-white font-bold py-3 rounded-xl transition text-sm">
+        Unlock Dashboard
+      </button>
+      <p id="pin-err" class="text-xs text-rose-600 font-semibold hidden">Galat PIN! Dubara koshish karein.</p>
+    </div>
+  </div>
+
+  <!-- Dashboard Top Bar -->
+  <header class="bg-[#4A030A] text-white border-b-4 border-[#D4AF37] px-6 py-4">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 bg-amber-400 text-slate-900 font-black rounded-xl flex items-center justify-center text-lg">
+          APS
+        </div>
+        <div>
+          <h1 class="text-lg font-black tracking-wide">APS Bada Mart &bull; Central Control</h1>
+          <p class="text-[11px] text-amber-200">10-Shop Multi-Vendor Shaadi Portal Management</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-3 text-xs">
+        <span class="bg-emerald-600/30 border border-emerald-400/50 text-emerald-300 px-3 py-1 rounded-full font-semibold">
+          <i class="fa-solid fa-circle text-[8px] animate-pulse mr-1"></i> Live Portal Active
+        </span>
+        <a href="index.html" target="_blank" class="bg-white/10 hover:bg-white/20 text-white px-3 py-1 rounded-full transition">
+          View Website
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Metrics Grid -->
+  <main class="max-w-7xl mx-auto p-4 sm:p-6 space-y-6">
+    <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+      <div class="bg-white p-5 rounded-2xl border shadow-sm flex items-center justify-between">
+        <div>
+          <p class="text-xs font-bold text-slate-500 uppercase">Total Leads</p>
+          <p class="text-2xl font-black text-slate-900 mt-1" id="stat-total">3</p>
+        </div>
+        <div class="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center text-xl">
+          <i class="fa-solid fa-inbox"></i>
+        </div>
+      </div>
+
+      <div class="bg-white p-5 rounded-2xl border shadow-sm flex items-center justify-between">
+        <div>
+          <p class="text-xs font-bold text-slate-500 uppercase">Unassigned Leads</p>
+          <p class="text-2xl font-black text-amber-600 mt-1" id="stat-pending">1</p>
+        </div>
+        <div class="w-12 h-12 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center text-xl">
+          <i class="fa-solid fa-clock"></i>
+        </div>
+      </div>
+
+      <div class="bg-white p-5 rounded-2xl border shadow-sm flex items-center justify-between">
+        <div>
+          <p class="text-xs font-bold text-slate-500 uppercase">Partner Shops</p>
+          <p class="text-2xl font-black text-slate-900 mt-1">10</p>
+        </div>
+        <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center text-xl">
+          <i class="fa-solid fa-store"></i>
+        </div>
+      </div>
+
+      <div class="bg-white p-5 rounded-2xl border shadow-sm flex items-center justify-between">
+        <div>
+          <p class="text-xs font-bold text-slate-500 uppercase">Est. 5% Commission</p>
+          <p class="text-2xl font-black text-emerald-600 mt-1">₹7,850</p>
+        </div>
+        <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center text-xl">
+          <i class="fa-solid fa-hand-holding-dollar"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- Leads Table & Assignment Control -->
+    <div class="bg-white rounded-3xl border shadow-sm overflow-hidden">
+      <div class="p-5 border-b flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-slate-50">
+        <div>
+          <h2 class="text-base font-black text-slate-900">Inbound Shaadi Kit Leads</h2>
+          <p class="text-xs text-slate-500">Review details and allocate orders to one of the 10 partner shops.</p>
+        </div>
+        <span class="text-[11px] bg-slate-200 text-slate-700 px-3 py-1 rounded-full font-bold">
+          Strict Admin Jurisdiction
+        </span>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs">
+          <thead class="bg-slate-100 text-slate-600 uppercase font-black tracking-wider border-b">
+            <tr>
+              <th class="py-3.5 px-4">Ref Code & Date</th>
+              <th class="py-3.5 px-4">Customer</th>
+              <th class="py-3.5 px-4">Selected Kit</th>
+              <th class="py-3.5 px-4">Location</th>
+              <th class="py-3.5 px-4">Shaadi Date</th>
+              <th class="py-3.5 px-4">Assigned Partner Shop</th>
+              <th class="py-3.5 px-4 text-center">Action</th>
+            </tr>
+          </thead>
+          <tbody id="leads-tbody" class="divide-y divide-slate-100 font-medium">
+            <!-- Populated by JavaScript -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // Master PIN (Change this as needed)
+    const MASTER_PIN = "1234";
+
+    function checkAdminPin() {
+      const entered = document.getElementById('admin-pin').value;
+      if (entered === MASTER_PIN) {
+        document.getElementById('pin-lock').classList.add('hidden');
+      } else {
+        document.getElementById('pin-err').classList.remove('hidden');
+      }
+    }
+
+    // 10 Partner Shops Network (Controlled by Super Admin)
+    const partnerShops = [
+      { id: 1, name: "Shop 1: Al-Madina Home Electronics (Old City Akola)", phone: "918421093969" },
+      { id: 2, name: "Shop 2: Royal Steel & Bartan Kendra (Gandhi Road)", phone: "918421093969" },
+      { id: 3, name: "Shop 3: Modern Furniture & Bedding Mart (Tilak Road)", phone: "918421093969" },
+      { id: 4, name: "Shop 4: New Bharat Appliances & Washing Hub", phone: "918421093969" },
+      { id: 5, name: "Shop 5: Standard Plastic & Crockeries House", phone: "918421093969" },
+      { id: 6, name: "Shop 6: Shaadi Mubarak Gift & Suitcase Centre", phone: "918421093969" },
+      { id: 7, name: "Shop 7: Akola Mega Bartan & Kitchen Depot", phone: "918421093969" },
+      { id: 8, name: "Shop 8: National LED TV & Cooling Solutions", phone: "918421093969" },
+      { id: 9, name: "Shop 9: Kisan Steel & Iron Almirah Works", phone: "918421093969" },
+      { id: 10, name: "Shop 10: Premier Home Comfort & Mattresses", phone: "918421093969" }
+    ];
+
+    // Inbound Lead Dataset
+    let leads = [
+      {
+        ref: "#APS-SH-8921",
+        receivedAt: "Today, 11:30 AM",
+        name: "Mohammad Irfan",
+        phone: "+91 9890123456",
+        kit: "Standard Shaadi Kit",
+        city: "Akola (Murtizapur Road)",
+        shaadiDate: "25 Nov 2026",
+        assignedShopId: null
+      },
+      {
+        ref: "#APS-SH-7740",
+        receivedAt: "Yesterday",
+        name: "Suresh Patil",
+        phone: "+91 9423187654",
+        kit: "Basic Shaadi Kit",
+        city: "Washim Naka, Akola",
+        shaadiDate: "12 Dec 2026",
+        assignedShopId: 1
+      },
+      {
+        ref: "#APS-SH-6311",
+        receivedAt: "28 Sep 2026",
+        name: "Abdul Qadir",
+        phone: "+91 8888765432",
+        kit: "Premium Shaadi Kit",
+        city: "Balapur, Akola Region",
+        shaadiDate: "05 Jan 2027",
+        assignedShopId: 2
+      }
+    ];
+
+    function renderLeads() {
+      const tbody = document.getElementById('leads-tbody');
+      tbody.innerHTML = leads.map((lead, idx) => {
+        const isAssigned = lead.assignedShopId !== null;
+        return `
+          <tr class="hover:bg-slate-50/80 transition">
+            <td class="py-3.5 px-4 font-mono font-bold text-[#7B0B18]">
+              ${lead.ref}
+              <span class="block text-[10px] text-slate-400 font-sans font-normal">${lead.receivedAt}</span>
+            </td>
+            <td class="py-3.5 px-4">
+              <span class="font-bold text-slate-900 block">${lead.name}</span>
+              <a href="tel:${lead.phone}" class="text-indigo-600 hover:underline">${lead.phone}</a>
+            </td>
+            <td class="py-3.5 px-4">
+              <span class="px-2 py-0.5 rounded text-[11px] font-bold ${lead.kit.includes('Premium') ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-700'}">
+                ${lead.kit}
+              </span>
+            </td>
+            <td class="py-3.5 px-4 text-slate-600">${lead.city}</td>
+            <td class="py-3.5 px-4 font-bold text-slate-800">${lead.shaadiDate}</td>
+            <td class="py-3.5 px-4">
+              <select onchange="updateAssignment(${idx}, this.value)" class="w-full bg-white border border-slate-300 text-xs py-1.5 px-2 rounded-lg font-medium focus:ring-1 focus:ring-[#7B0B18]">
+                <option value="">-- Choose Partner Shop --</option>
+                ${partnerShops.map(s => `
+                  <option value="${s.id}" ${lead.assignedShopId === s.id ? 'selected' : ''}>
+                    ${s.name}
+                  </option>
+                `).join('')}
+              </select>
+            </td>
+            <td class="py-3.5 px-4 text-center">
+              ${isAssigned ? `
+                <button onclick="dispatchToShopWhatsApp(${idx})" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg font-bold text-[11px] shadow transition flex items-center gap-1 mx-auto">
+                  <i class="fa-brands fa-whatsapp"></i> Notify Shop
+                </button>
+              ` : `
+                <span class="text-[11px] text-amber-600 font-bold">Pending Allocation</span>
+              `}
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function updateAssignment(leadIndex, shopId) {
+      leads[leadIndex].assignedShopId = shopId ? parseInt(shopId) : null;
+      renderLeads();
+    }
+
+    function dispatchToShopWhatsApp(leadIndex) {
+      const lead = leads[leadIndex];
+      const shop = partnerShops.find(s => s.id === lead.assignedShopId);
+      if (!shop) return;
+
+      const message = `*NEW ORDER ASSIGNED - APS BADA MART*%0A%0A` +
+        `*Assigned Partner:* ${shop.name}%0A` +
+        `*Order Ref:* ${lead.ref}%0A` +
+        `*Kit Package:* ${lead.kit}%0A` +
+        `*Delivery Location:* ${lead.city}%0A` +
+        `*Customer Shaadi Date:* ${lead.shaadiDate}%0A%0A` +
+        `*Customer Contact:* ${lead.name} (${lead.phone})%0A` +
+        `*Commercial Terms:* 5% Commission upon kit delivery.%0A%0A` +
+        `_Please inspect inventory and begin kit packaging._`;
+
+      window.open(`https://wa.me/${shop.phone}?text=${message}`, '_blank');
+    }
+
+    renderLeads();
+  </script>
+</body>
+</html>
