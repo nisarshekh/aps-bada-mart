@@ -54,7 +54,7 @@
       <div class="bg-white p-5 rounded-2xl border shadow-sm flex items-center justify-between">
         <div>
           <p class="text-xs font-bold text-slate-500 uppercase">Total Leads</p>
-          <p class="text-2xl font-black text-slate-900 mt-1" id="stat-total">3</p>
+          <p class="text-2xl font-black text-slate-900 mt-1" id="stat-total">0</p>
         </div>
         <div class="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center text-xl">
           <i class="fa-solid fa-inbox"></i>
@@ -64,7 +64,7 @@
       <div class="bg-white p-5 rounded-2xl border shadow-sm flex items-center justify-between">
         <div>
           <p class="text-xs font-bold text-slate-500 uppercase">Unassigned Leads</p>
-          <p class="text-2xl font-black text-amber-600 mt-1" id="stat-pending">1</p>
+          <p class="text-2xl font-black text-amber-600 mt-1" id="stat-pending">0</p>
         </div>
         <div class="w-12 h-12 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center text-xl">
           <i class="fa-solid fa-clock"></i>
@@ -84,7 +84,7 @@
       <div class="bg-white p-5 rounded-2xl border shadow-sm flex items-center justify-between">
         <div>
           <p class="text-xs font-bold text-slate-500 uppercase">Est. 5% Commission</p>
-          <p class="text-2xl font-black text-emerald-600 mt-1">₹7,850</p>
+          <p class="text-2xl font-black text-emerald-600 mt-1" id="stat-commission">₹0</p>
         </div>
         <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center text-xl">
           <i class="fa-solid fa-hand-holding-dollar"></i>
@@ -97,7 +97,7 @@
       <div class="p-5 border-b flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-slate-50">
         <div>
           <h2 class="text-base font-black text-slate-900">Inbound Shaadi Kit Leads</h2>
-          <p class="text-xs text-slate-500">Review details and allocate orders to one of the 10 partner shops.</p>
+          <p class="text-xs text-slate-500">Live Customer Leads &ndash; Allocate order to nearest partner shop.</p>
         </div>
         <span class="text-[11px] bg-slate-200 text-slate-700 px-3 py-1 rounded-full font-bold">
           Strict Admin Jurisdiction
@@ -118,7 +118,7 @@
             </tr>
           </thead>
           <tbody id="leads-tbody" class="divide-y divide-slate-100 font-medium">
-            <!-- Populated by JavaScript -->
+            <!-- Populated Live by JS -->
           </tbody>
         </table>
       </div>
@@ -126,7 +126,7 @@
   </main>
 
   <script>
-    // Master PIN (Change this as needed)
+    // Master PIN
     const MASTER_PIN = "1234";
 
     function checkAdminPin() {
@@ -138,7 +138,7 @@
       }
     }
 
-    // 10 Partner Shops Network (Controlled by Super Admin)
+    // 10 Partner Shops Network
     const partnerShops = [
       { id: 1, name: "Shop 1: Al-Madina Home Electronics (Old City Akola)", phone: "918421093969" },
       { id: 2, name: "Shop 2: Royal Steel & Bartan Kendra (Gandhi Road)", phone: "918421093969" },
@@ -152,8 +152,7 @@
       { id: 10, name: "Shop 10: Premier Home Comfort & Mattresses", phone: "918421093969" }
     ];
 
-    // Inbound Lead Dataset
-    let leads = [
+    const defaultLeads = [
       {
         ref: "#APS-SH-8921",
         receivedAt: "Today, 11:30 AM",
@@ -173,27 +172,45 @@
         city: "Washim Naka, Akola",
         shaadiDate: "12 Dec 2026",
         assignedShopId: 1
-      },
-      {
-        ref: "#APS-SH-6311",
-        receivedAt: "28 Sep 2026",
-        name: "Abdul Qadir",
-        phone: "+91 8888765432",
-        kit: "Premium Shaadi Kit",
-        city: "Balapur, Akola Region",
-        shaadiDate: "05 Jan 2027",
-        assignedShopId: 2
       }
     ];
 
+    function getStoredLeads() {
+      const stored = localStorage.getItem('aps_shaadi_leads');
+      if (!stored) {
+        localStorage.setItem('aps_shaadi_leads', JSON.stringify(defaultLeads));
+        return defaultLeads;
+      }
+      return JSON.parse(stored);
+    }
+
+    let leads = getStoredLeads();
+
+    function updateDashboardMetrics() {
+      const total = leads.length;
+      const unassigned = leads.filter(l => l.assignedShopId === null).length;
+      
+      document.getElementById('stat-total').innerText = total;
+      document.getElementById('stat-pending').innerText = unassigned;
+      document.getElementById('stat-commission').innerText = "₹" + (total * 2500).toLocaleString('en-IN');
+    }
+
     function renderLeads() {
+      updateDashboardMetrics();
       const tbody = document.getElementById('leads-tbody');
+      
+      if (leads.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="py-8 text-center text-slate-400">No leads received yet.</td></tr>`;
+        return;
+      }
+
       tbody.innerHTML = leads.map((lead, idx) => {
         const isAssigned = lead.assignedShopId !== null;
         return `
-          <tr class="hover:bg-slate-50/80 transition">
+          <tr class="hover:bg-slate-50/80 transition ${idx === 0 && lead.receivedAt === 'Just now' ? 'bg-amber-50/60' : ''}">
             <td class="py-3.5 px-4 font-mono font-bold text-[#7B0B18]">
               ${lead.ref}
+              ${lead.receivedAt === 'Just now' ? '<span class="ml-1 bg-red-600 text-white text-[9px] px-1.5 py-0.5 rounded font-bold uppercase animate-pulse">NEW</span>' : ''}
               <span class="block text-[10px] text-slate-400 font-sans font-normal">${lead.receivedAt}</span>
             </td>
             <td class="py-3.5 px-4">
@@ -233,6 +250,7 @@
 
     function updateAssignment(leadIndex, shopId) {
       leads[leadIndex].assignedShopId = shopId ? parseInt(shopId) : null;
+      localStorage.setItem('aps_shaadi_leads', JSON.stringify(leads));
       renderLeads();
     }
 
@@ -253,6 +271,24 @@
 
       window.open(`https://wa.me/${shop.phone}?text=${message}`, '_blank');
     }
+
+    try {
+      const syncChannel = new BroadcastChannel('aps_lead_channel');
+      syncChannel.onmessage = function(event) {
+        if (event.data && event.data.type === 'NEW_LEAD') {
+          leads = getStoredLeads();
+          renderLeads();
+          alert("🔔 Nayi Shaadi Kit Lead Aayi Hai! Check Dashboard.");
+        }
+      };
+    } catch(e) {}
+
+    window.addEventListener('storage', function(e) {
+      if (e.key === 'aps_shaadi_leads') {
+        leads = getStoredLeads();
+        renderLeads();
+      }
+    });
 
     renderLeads();
   </script>
