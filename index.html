@@ -39,13 +39,50 @@
   <!-- Floating WhatsApp CTA -->  <a href="https://wa.me/918421093969" target="_blank" class="fixed bottom-6 right-6 bg-[#16A34A] hover:bg-[#15803D] text-white w-14 h-14 rounded-full flex items-center justify-center shadow-2xl text-2xl z-40 border-2 border-white">    <i class="fa-brands fa-whatsapp"></i>  </a>
   <!-- JavaScript Form Handling Logic -->  <script>    let latestEnquiryData = null;
     function selectKitForEnquiry(kitName) {      const selectEl = document.getElementById('enq-kit');      if (selectEl) {        selectEl.value = kitName;      }      document.getElementById('enquiry').scrollIntoView({ behavior: 'smooth' });    }
-    function handleEnquirySubmit(event) {      event.preventDefault();
-      const kit = document.getElementById('enq-kit').value;      const name = document.getElementById('enq-name').value.trim();      const phone = document.getElementById('enq-phone').value.trim();      const city = document.getElementById('enq-city').value.trim();      const date = document.getElementById('enq-date').value;      const notes = document.getElementById('enq-notes').value.trim();
-      const refCode = '#APS-SH-' + Math.floor(1000 + Math.random() * 9000);
-      latestEnquiryData = {        ref: refCode,        kit: kit,        name: name,        phone: phone,        city: city,        date: date,        notes: notes      };
-      // Populate Modal      document.getElementById('disp-ref').innerText = refCode;      document.getElementById('disp-kit').innerText = kit;      document.getElementById('disp-name').innerText = name;      document.getElementById('disp-city').innerText = city;
-      // Show Modal      document.getElementById('confirmation-modal').classList.remove('hidden');
-      // Reset Form      document.getElementById('shaadi-enquiry-form').reset();    }
-    function sendCopyViaWhatsApp() {      if (!latestEnquiryData) return;
-      const message = `*NEW SHAADI KIT ENQUIRY - APS BADA MART*%0A%0A` +        `*Ref Code:* ${latestEnquiryData.ref}%0A` +        `*Selected Kit:* ${latestEnquiryData.kit}%0A` +        `*Customer Name:* ${latestEnquiryData.name}%0A` +        `*Mobile:* ${latestEnquiryData.phone}%0A` +        `*City/Area:* ${latestEnquiryData.city}%0A` +        `*Shaadi Date:* ${latestEnquiryData.date}%0A` +        (latestEnquiryData.notes ? `*Notes:* ${latestEnquiryData.notes}%0A` : '') +        `%0A*Status:* Pending Admin Shop Assignment (5% Commission Model)`;
-      window.open(`https://wa.me/918421093969?text=${message}`, '_blank');    }  </script></body></html>
+    function handleEnquirySubmit(event) {
+      event.preventDefault();
+
+      const kit = document.getElementById('enq-kit').value;
+      const name = document.getElementById('enq-name').value.trim();
+      const phone = document.getElementById('enq-phone').value.trim();
+      const city = document.getElementById('enq-city').value.trim();
+      const date = document.getElementById('enq-date').value;
+      const notes = document.getElementById('enq-notes').value.trim();
+
+      const refCode = '#APS-SH-' + Math.floor(1000 + Math.random() * 9000);
+
+      latestEnquiryData = {
+        ref: refCode,
+        receivedAt: "Just now",
+        name: name,
+        phone: phone,
+        kit: kit,
+        city: city,
+        shaadiDate: date,
+        notes: notes,
+        assignedShopId: null
+      };
+
+      // --- LIVE LEAD SYNC TO ADMIN ---
+      let existingLeads = JSON.parse(localStorage.getItem('aps_shaadi_leads') || '[]');
+      existingLeads.unshift(latestEnquiryData); // Nayi lead top par
+      localStorage.setItem('aps_shaadi_leads', JSON.stringify(existingLeads));
+      
+      // Notify open admin tabs instantly
+      try {
+        const syncChannel = new BroadcastChannel('aps_lead_channel');
+        syncChannel.postMessage({ type: 'NEW_LEAD', data: latestEnquiryData });
+      } catch (e) {}
+
+      // Populate Modal
+      document.getElementById('disp-ref').innerText = refCode;
+      document.getElementById('disp-kit').innerText = kit;
+      document.getElementById('disp-name').innerText = name;
+      document.getElementById('disp-city').innerText = city;
+
+      // Show Modal
+      document.getElementById('confirmation-modal').classList.remove('hidden');
+
+      // Reset Form
+      document.getElementById('shaadi-enquiry-form').reset();
+    }
